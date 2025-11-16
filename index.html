@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link
+            rel="shortcut icon"
+            href="/images/logo/Ведомость.png"
+            type="image/png"
+        />
+        <title>Ведомость</title>
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+                font-family: "Times New Roman", Times, serif;
+                font-weight: bold;
+            }
+            body {
+                padding: 0.5vw;
+                background-color: #333333;
+                font-weight: bold;
+            }
+            .container {
+                margin: 0 auto;
+                padding: 0.5vw;
+                background: #000000;
+                border-radius: 0.8vw;
+                box-shadow: 0 0.2vw 1vw rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+            header {
+                background: #000000;
+                color: white;
+                padding: 1.5vw;
+                text-align: center;
+            }
+            h1 {
+                margin: 0;
+                font-size: 3vw;
+                font-family: "Times New Roman", Times, serif;
+                font-weight: bold;
+            }
+            .input-container {
+                background-color: #000000;
+                padding: 1vw;
+                margin: 2vw 0 0 8vw;
+                width: fit-content;
+                border-radius: 0.4vw;
+                display: flex;
+                align-items: stretch;
+                justify-content: center;
+                gap: 2vw;
+            }
+            .input-group {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .input-label {
+                color: #ffffff;
+                font-family: "Times New Roman", Times, serif;
+                font-weight: bold;
+                font-size: 1.2vw;
+                margin-bottom: 0.2vw;
+                min-height: 1.5vw;
+            }
+            .input-container input[type="date"] {
+                background-color: #00dddd;
+                color: #3300ff;
+                border: 0.2vw solid #333;
+                padding: 0.6vw 1vw;
+                font-family: "Times New Roman", Times, serif;
+                font-weight: bold;
+                font-size: 1.5vw;
+                border-radius: 0.8vw;
+                width: 15vw;
+                text-align: center;
+            }
+            .input-container input[type="title"] {
+                background-color: #770077;
+                color: #ffff00;
+                border: 0.2vw solid #333;
+                padding: 0.6vw 1vw;
+                font-family: "Times New Roman", Times, serif;
+                font-weight: bold;
+                font-size: 1.5vw;
+                border-radius: 0.8vw;
+                width: 30vw;
+                text-align: center;
+            }
+            .input-container input[type="name"] {
+                background-color: #771100;
+                color: #00ff00;
+                border: 0.2vw solid #333;
+                padding: 0.6vw 1vw;
+                font-family: "Times New Roman", Times, serif;
+                font-weight: bold;
+                font-size: 1.5vw;
+                border-radius: 0.8vw;
+                width: 35vw;
+                text-align: center;
+            }
+            .table-container {
+                overflow-x: auto;
+            }
+            table {
+                width: 92vw;
+                border-collapse: collapse;
+                font-family: "Times New Roman", Times, serif;
+                font-weight: bold;
+                border: 0.2vw solid #000;
+                margin: 0.5vw;
+            }
+            th,
+            td {
+                border: 0.2vw solid #000;
+                padding: 0.2vw;
+                text-align: left;
+                font-size: 1.4vw;
+                font-family: "Times New Roman", Times, serif;
+                font-weight: bold;
+                background-color: #007766;
+            }
+            /* Шапка таблицы */
+            th {
+                background-color: #ccc0d9;
+                color: #000000;
+                text-align: center;
+                position: sticky;
+                top: 0;
+                font-weight: bold;
+                font-size: 1.4vw;
+            }
+            /* Исключение: Шапка "Мест Всего" (7-й столбец) + уникальный стиль */
+            th:nth-child(7) {
+                background-color: #ff0000;
+                color: #ffff00;
+                font-size: 1.8vw;
+            }
+            /* Добавленный столбец для чекбоксов в шапке */
+            th:first-child {
+                position: sticky;
+                left: 0;
+                z-index: 10;
+            }
+            /* Столбец I и ячейка I1 в шапке */
+            th {
+                background-color: #ccc0d9;
+                color: #000000;
+                text-align: center;
+                position: sticky;
+                top: 0;
+                font-weight: bold;
+                font-size: 1.3vw;
+            }
+            /* Столбец K и ячейка K1 в шапке */
+            th:nth-child(8),
+            td:nth-child(8):not(.readonly) {
+                background-color: #0000ff;
+                color: #ffff00;
+                font-size: 1.8vw;
+            }
+            /* Столбец D — Увеличиваем в 2 раза ширину */
+            th:nth-child(2) {
+                width: 25vw;
+                font-size: 1.5vw;
+                background-color: #ccc0d9;
+            }
+            td:nth-child(2):not(.readonly) {
+                width: 25vw;
+                font-size: 1.5vw;
+                background-color: #007766;
+            }
+            /* Замена input на textarea для 2-го столбца */
+            td:nth-child(2):not(.readonly) textarea {
+                width: 100%;
+                /* height: 100%; */
+                padding: 0.2vw;
+                margin: 0;
+                border: none;
+                background-color: #007766; /* Тот же фон, что и у input */
+                color: #ffff00;
+                font-family: "Times New Roman", Times, serif;
+                font-weight: bold;
+                font-size: 2.1vw;
+                line-height: 0.9; /* Минимальный межстрочный интервал */
+                resize: none; /* Запрет ручного изменения размера */
+                text-align: center;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align-last: center; /* Центрирование последней строки */
+                word-wrap: break-word;
+                word-break: break-word;
+                overflow: hidden;
+                outline: none;
+            }
+            /* Остальные столбцы — без изменений */
+            td:nth-child(3):not(.readonly) input {
+                background-color: #00ff00;
+                font-size: 1.5vw;
+            }
+            td:nth-child(3):not(.readonly) {
+                background-color: #00ff00;
+                color: #000000;
+                font-size: 1.5vw;
+                width: 5vw;
+            }
+            td:nth-child(4):not(.readonly) input {
+                background-color: #00ffff;
+                font-size: 1.5vw;
+            }
+            td:nth-child(4):not(.readonly) {
+                background-color: #00ffff;
+                color: #000000;
+                font-size: 1.5vw;
+                width: 5vw;
+            }
+            td:nth-child(5):not(.readonly) input {
+                background-color: #ff5500;
+                color: #ffff00;
+                font-size: 1.5vw;
+            }
+            td:nth-child(5):not(.readonly) {
+                background-color: #ff5500;
+                color: #000000;
+                font-size: 1.5vw;
+                width: 5vw;
+            }
+            td:nth-child(6):not(.readonly) input {
+                background-color: #7030a0;
+                color: #ffff00;
+                font-size: 1.5vw;
+            }
+            td:nth-child(6):not(.readonly) {
+                background-color: #7030a0;
+                color: #000000;
+                font-size: 1.5vw;
+                width: 5vw;
+            }
+            /* Столбец K (Мест Всего) — РАБОЧИЕ ЯЧЕЙКИ: фон жёлтый, шрифт красный */
+            td:nth-child(7):not(.readonly):not(.summary) {
+                background-color: #ffff00;
+                color: #ff0000;
+                font-size: 1.7vw;
+            }
+            /* Столбец L */
+            td:nth-child(8):not(.readonly):not(.summary) {
+                background-color: #0000ff;
+                color: #ffff00;
+                font-size: 1.7vw;
+            }
+            /* Столбец M */
+            td:nth-child(9):not(.readonly) {
+                background-color: #ffffff;
+                color: #000000;
+                font-size: 2.4vw;
+            }
+            /* Столбец N — Штук Всего по СЧЁТУ: ФОН БЕЛЫЙ, ШРИФТ ЧЁРНЫЙ */
+            td:nth-child(10):not(.readonly):not(.summary) {
+                background-color: #ffffff;
+                color: #ff0000;
+                font-size: 2.1vw;
+            }
+            /* Столбец N — input внутри: фон белый */
+            td:nth-child(10):not(.readonly):not(.summary) input {
+                background-color: #ffffff;
+                color: #000000;
+                font-size: 2.1vw;
+            }
+            /* Столбец O */
+            td:nth-child(11):not(.readonly) {
+                background-color: #ffffff;
+                color: #ff0000;
+                font-size: 2.4vw;
+            }
+            tr:nth-child(even) {
+                background-color: #f8f9fa;
+            }
+            /* ОБЪЕМНЫЕ РАМКИ ДЛЯ INPUT-ОВ с наследованием фона — УГЛУБЛЁННЫЙ ЭФФЕКТ */
+            .input-cell {
+                width: 100%;
+                border: 0.2vw solid #333;
+                padding: 0.4vw;
+                text-align: center;
+                font-family: "Times New Roman", Times, serif;
+                font-weight: bold;
+                font-size: 2.1vw;
+                height: 4.5vw;
+                line-height: 4.5vw;
+                background-color: inherit;
+                box-shadow: inset 0.1vw 0.1vw 0.2vw rgba(0, 0, 0, 0.3),
+                    inset -0.1vw -0.1vw 0.2vw rgba(255, 255, 255, 0.3);
+                border-radius: 0.2vw;
+            }
+            /* Эффект нажатия (выступление) */
+            .input-cell:focus {
+                outline: 0.2vw solid #4d90fe;
+                box-shadow: inset 0.05vw 0.05vw 0.2vw rgba(0, 0, 0, 0.4),
+                    inset -0.05vw -0.05vw 0.2vw rgba(255, 255, 255, 0.4);
+                transform: translate(-0.1vw, -0.1vw);
+            }
+            .input-cell:hover {
+                box-shadow: inset 0.2vw 0.2vw 0.3vw rgba(0, 0, 0, 0.4),
+                    inset -0.1vw -0.1vw 0.2vw rgba(255, 255, 255, 0.5);
+            }
+            .formula-cell {
+                text-align: center;
+                padding: 0.6vw 1vw;
+                font-weight: bold;
+                font-family: "Times New Roman", Times, serif;
+                font-size: 2.4vw;
+            }
+            .summary {
+                background-color: #ff0000;
+                color: #ffff00;
+                font-weight: bold;
+                text-align: center;
+                font-size: 2.4vw;
+            }
+            .readonly {
+                background-color: #f5f5f5;
+                color: #666;
+                font-size: 2.1vw;
+            }
+            .positive {
+                color: #28a745;
+                font-size: 2.4vw;
+            }
+            .negative {
+                color: #dc3545;
+                font-size: 2.4vw;
+            }
+            .controls {
+                margin: 1vw;
+                padding: 0.5vw;
+                background-color: #000000;
+                text-align: center;
+                border-top: 0.2vw solid #000;
+                display: flex;
+                gap: 2vw;
+                justify-content: center;
+                width: 92vw;
+                justify-content: space-between;
+                align-items: center;
+                text-align: center;
+            }
+            .calc-btn,
+            .add-row-btn,
+            .delete-row-btn,
+            #calculation-area {
+                background: #000000;
+                color: #ff0000;
+                border: 0.2vw solid #ffff00;
+                padding: 1.2vw 2.4vw;
+                border-radius: 0.4vw;
+                cursor: pointer;
+                font-size: 1.5vw;
+                font-family: "Times New Roman", Times, serif;
+                font-weight: bold;
+                top: 0;
+                height: 5vw;
+            }
+            .calc-btn:hover,
+            .add-row-btn:hover,
+            .delete-row-btn:hover {
+                background: #ffffff;
+                color: #ff0000;
+            }
+            .calc-btn:active,
+            .add-row-btn:active,
+            .delete-row-btn:active {
+                background: #ffffff;
+                color: #ff0000;
+                top: 0.2vw;
+            }
+            /* Стили для чекбокса в первом столбце */
+            .checkbox-cell {
+                background-color: #000000;
+                padding: 1vw;
+                text-align: center;
+                position: sticky;
+                left: 0;
+                z-index: 5;
+                border: 0.2vw solid #000;
+            }
+            .checkbox-cell input[type="checkbox"] {
+                width: 2vw;
+                height: 2vw;
+                accent-color: #ff0000;
+                background-color: #000000;
+                border: none;
+                cursor: pointer;
+            }
+            /* Заголовок нового столбца */
+            th:first-child {
+                background-color: #000000;
+                color: #ffffff;
+                position: sticky;
+                left: 0;
+                z-index: 10;
+                font-size: 1.6vw;
+            }
+            /* Итоговая строка: все ячейки черные, кроме ячейки с формулой */
+            tr:last-child td {
+                background-color: #000000;
+                color: #ffffff;
+            }
+            tr:last-child .total {
+                text-align: center;
+                background-color: #000000;
+                color: #ff0000;
+            }
+            tr:last-child .formula-cell {
+                background-color: #ff0000;
+                color: #ffff00;
+            }
+
+            /* Добавляем стили для нового textarea */
+            #calculation-area {
+                width: 30vw;
+                font-family: "Times New Roman", Times, serif;
+                font-weight: bold;
+                resize: none;
+                /* эффекты при наведении и нажатии */
+                transition: background-color 0.3s, box-shadow 0.3s;
+            }
+            #calculation-area:hover {
+                background-color: #ffffff;
+                color: #ff0000;
+            }
+            #calculation-area:focus {
+                background-color: #ffffff;
+                color: #ff0000;
+                outline: none; /* убираем стандартную подсветку фокуса */
+            }
+
+            /* Стили для кнопок */
+            .delete-row-btn,
+            .calc-btn,
+            .add-row-btn {
+                background: #000000;
+                color: #ff0000;
+                border: 0.2vw solid #ffff00;
+                padding: 1.2vw 0.8vw; /* уменьшили padding для компактности */
+                border-radius: 0.4vw;
+                font-size: 1.5vw;
+                cursor: pointer;
+
+                /* эффекты при наведении */
+                transition: background-color 0.3s, box-shadow 0.3s;
+            }
+
+            /* Стили для textarea */
+            #calculation-area {
+                flex: 1; /* занимает оставшееся пространство */
+                min-width: 20vw; /* минимальная ширина */
+                height: 5vw;
+                background-color: #000000;
+                color: #ff0000;
+                border: 0.2vw solid #ffff00;
+                padding: 1.2vw;
+                border-radius: 0.4vw;
+                font-family: "Times New Roman", Times, serif;
+                font-weight: bold;
+                font-size: 1.5vw;
+                resize: none;
+                /* эффекты при наведении */
+                transition: background-color 0.3s, box-shadow 0.3s;
+            }
+
+            /* эффекты для всех элементов при наведении */
+            .delete-row-btn:hover,
+            .calc-btn:hover,
+            .add-row-btn:hover,
+            #calculation-area:hover {
+                background: #ffffff;
+                color: #ff0000;
+            }
+            .radio-cell {
+                background-color: #000000;
+                padding: 1vw;
+                text-align: center;
+                border: 0.2vw solid #000;
+            }
+            .radio-cell input[type="radio"] {
+                width: 2vw;
+                height: 2vw;
+                accent-color: #ff0000;
+                background-color: #000000;
+                border: none;
+                cursor: pointer;
+            }
+            .checkbox-cell {
+                background-color: #000000;
+                padding: 1vw;
+                text-align: center;
+                position: sticky;
+                left: 0;
+                z-index: 5;
+                border: 0.2vw solid #000;
+                display: flex; /* добавляем flex-макет */
+                flex-direction: row;
+                justify-content: center; /* центрируем элементы */
+                gap: 0.5vw; /* добавляем промежуток между элементами */
+                height: auto; /* убираем фиксированную высоту */
+            }
+            .checkbox-cell input[type="checkbox"],
+            .checkbox-cell input[type="radio"] {
+                width: 2vw;
+                height: 2vw;
+                accent-color: #ff0000;
+                background-color: #000000;
+                border: none;
+                cursor: pointer;
+                vertical-align: middle;
+                margin: 0.5vw; /* небольшие отступы между элементами */
+            }
+            #provider::placeholder,
+            #driver::placeholder {
+                color: #7a7a2b;
+            }
+            #provider::-webkit-input-placeholder,
+            #driver::-webkit-input-placeholder {
+                color: #7a7a2b;
+            }
+            #provider::-moz-placeholder,
+            #driver::-moz-placeholder {
+                color: #7a7a2b;
+                opacity: 1;
+            }
+            #provider:-ms-input-placeholder,
+            #driver:-ms-input-placeholder {
+                color: #7a7a2b;
+            }
+            #globalDate::placeholder {
+                color: #3a5055;
+            }
+            #globalDate::-webkit-input-placeholder {
+                color: #3a5055;
+            }
+            #globalDate::-moz-placeholder {
+                color: #3a5055;
+                opacity: 1;
+            }
+            #globalDate:-ms-input-placeholder {
+                color: #3a5055;
+            }
+            #empty {
+                width: 9.4vw;
+            }
+            #mark::placeholder {
+                color: rgb(130, 121, 39);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>Ведомость</h1>
+                <div class="input-container">
+                    <div class="input-group">
+                        <span class="input-label">Дата:</span>
+                        <input type="date" id="globalDate" value="" />
+                    </div>
+                    <div class="input-group">
+                        <span class="input-label">Поставщик:</span>
+                        <input
+                            type="title"
+                            id="provider"
+                            placeholder="НАЗВАНИЕ"
+                            value=""
+                        />
+                    </div>
+                    <div class="input-group">
+                        <span class="input-label">Водитель:</span>
+                        <input
+                            type="name"
+                            id="driver"
+                            placeholder="Фамилия Имя Отчество"
+                            value=""
+                        />
+                    </div>
+                </div>
+            </header>
+            <div class="table-container">
+                <table id="excelTable">
+                    <thead>
+                        <tr>
+                            <th id="empty"></th>
+                            <th>Номенклатура</th>
+                            <th>Упаковок</th>
+                            <th>Штук в Упаковке</th>
+                            <th>+ Штук отдельно</th>
+                            <th>Неполных упаковок</th>
+                            <th>Мест Всего</th>
+                            <th>Штук Всего</th>
+                            <th>Штук Всего по СЧЁТУ</th>
+                            <th>Расхождение</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Итоговая строка -->
+                        <tr>
+                            <td class="readonly"></td>
+                            <td class="readonly"></td>
+                            <td class="readonly"></td>
+                            <td class="readonly"></td>
+                            <td class="readonly"></td>
+                            <td class="readonly total">ИТОГО:</td>
+                            <td class="formula-cell summary" id="L12"></td>
+                            <td class="readonly"></td>
+                            <td class="readonly"></td>
+                            <td class="readonly"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="controls">
+                <button class="delete-row-btn" onclick="deleteSelectedRows()">
+                    Удалить отмеченные
+                </button>
+                <textarea
+                    id="calculation-area"
+                    placeholder="Введите расчёт"
+                ></textarea>
+                <button class="calc-btn" onclick="calculateAll()">
+                    Расчёт
+                </button>
+                <button class="add-row-btn" onclick="addWorkRow()">
+                    Добавить строку
+                </button>
+            </div>
+        </div>
+        <script>
+            let activeRow = null; // Добавляем переменную для хранения активной строки
+
+            // Добавляем обработчик клика для определения активной строки
+            document
+                .querySelector("#excelTable tbody")
+                .addEventListener("click", function (e) {
+                    if (e.target.closest("tr")) {
+                        activeRow = e.target.closest("tr");
+                    }
+                });
+
+            function calculateAll() {
+                const checkedRow = document
+                    .querySelector('input[type="radio"]:checked')
+                    .closest("tr");
+                if (!checkedRow) return;
+
+                const rowId = checkedRow.id;
+                const rowIndex = parseInt(rowId.substring(3));
+
+                const targetCell = checkedRow.querySelector(
+                    `input[data-cell="G${rowIndex}"]`
+                );
+
+                // Получаем значение
+                const calculationInput =
+                    document.getElementById("calculation-area").value;
+
+                // Проверяем, есть ли значение и выбрана ли строка
+                if (calculationInput && activeRow) {
+                    try {
+                        // Вычисляем результат выражения
+                        const result = eval(
+                            calculationInput.replace(/\s+/g, "")
+                        );
+
+                        // Находим нужную ячейку в активной строке
+                        const gCell = activeRow.querySelector(
+                            'input[data-cell^="G"]'
+                        );
+
+                        // Если ячейка найдена - записываем результат
+                        if (gCell) {
+                            gCell.value = result;
+                        }
+
+                        // Очищаем textarea после успешного расчёта
+                        document.getElementById("calculation-area").value = "";
+                    } catch (error) {
+                        alert("Ошибка в формуле!");
+                    }
+                }
+
+                // Основной расчёт таблицы
+                const tableBody = document.getElementById("tableBody");
+                const rows = tableBody.querySelectorAll("tr");
+                const rowCount = rows.length;
+                const totalRows = rowCount - 1;
+                let L12 = 0;
+                const LValues = [];
+
+                for (let i = 0; i < totalRows; i++) {
+                    const row = rows[i];
+                    const rowId = row.id;
+                    const rowIndex = parseInt(rowId.substring(3));
+
+                    const GCell = getCellValue("G" + rowIndex);
+                    const HCell = getCellValue("H" + rowIndex);
+                    const ICell = getCellValue("I" + rowIndex);
+                    const JCell = getCellValue("J" + rowIndex);
+                    const NCell = getCellValue("N" + rowIndex);
+
+                    const LValue = GCell + JCell;
+                    const MValue = GCell * HCell + ICell;
+                    const OValue = MValue - NCell;
+
+                    document.getElementById("L" + rowIndex).textContent =
+                        LValue;
+                    document.getElementById("M" + rowIndex).textContent =
+                        MValue;
+                    document.getElementById("O" + rowIndex).textContent =
+                        OValue;
+
+                    document.getElementById("O" + rowIndex).className =
+                        OValue === 0
+                            ? "formula-cell"
+                            : OValue > 0
+                            ? "formula-cell positive"
+                            : "formula-cell negative";
+
+                    LValues.push(LValue);
+                    L12 += LValue;
+                }
+
+                document.getElementById("L12").textContent = L12;
+            }
+
+            // Простая функция для вычисления выражений
+            function calculateExpression(value) {
+                if (value.startsWith("=")) {
+                    try {
+                        return eval(value.substring(1));
+                    } catch (e) {
+                        console.error("Ошибка вычисления:", value, e);
+                        return 0;
+                    }
+                }
+                return parseFloat(value) || 0;
+            }
+            // Функция для получения значения ячейки по ID
+            function getCellValue(cellId) {
+                const input = document.querySelector(`[data-cell="${cellId}"]`);
+                if (!input) {
+                    console.error("Не найдена ячейка:", cellId);
+                    return 0;
+                }
+                if (input.value.startsWith("=")) {
+                    return calculateExpression(input.value);
+                }
+                return parseFloat(input.value) || 0;
+            }
+            // Функция для добавления новой рабочей строки перед итоговой
+            function addWorkRow() {
+                const tableBody = document.getElementById("tableBody");
+                const rows = tableBody.querySelectorAll("tr");
+                const rowCount = rows.length;
+                // Итоговая строка всегда последняя
+                const lastRowIndex = rowCount - 1;
+                const lastRow = rows[lastRowIndex];
+                // Создаем новую строку
+                const newRow = document.createElement("tr");
+                // Определяем номер новой строки
+                // Если нет рабочих строк, то это будет row2
+                // Иначе берем номер последней рабочей строки + 1
+                let newRowNumber;
+                if (rowCount === 1) {
+                    // Первый раз добавляем - начинаем с row2
+                    newRowNumber = 2;
+                } else {
+                    // Найти последнюю рабочую строку (все кроме последней итоговой)
+                    const workingRows = Array.from(rows).slice(0, -1);
+                    const lastWorkingRow = workingRows[workingRows.length - 1];
+                    newRowNumber = parseInt(lastWorkingRow.id.substring(3)) + 1;
+                }
+                const newRowId = "row" + newRowNumber;
+                newRow.id = newRowId;
+                // Создаем содержимое новой строки (с учетом удаленного столбца)
+                newRow.innerHTML = `
+                    <td class="checkbox-cell">
+                        <input type="checkbox" data-cell="CHECK${newRowNumber}">
+                        <input type="radio" name="row-selection" data-cell="RADIO${newRowNumber}">
+                    </td>
+                    <td><textarea class="input-cell" id="mark" placeholder="маркировка              товара" data-cell="F${newRowNumber}"></textarea></td>
+                    <td><input class="input-cell" type="text" value="0" data-cell="G${newRowNumber}"></td>
+                    <td><input class="input-cell" type="number" value="0" data-cell="H${newRowNumber}"></td>
+                    <td><input class="input-cell" type="number" value="0" data-cell="I${newRowNumber}"></td>
+                    <td><input class="input-cell" type="number" value="0" data-cell="J${newRowNumber}"></td>
+                    <td class="formula-cell" id="L${newRowNumber}"></td>
+                    <td class="formula-cell" id="M${newRowNumber}"></td>
+                    <td><input class="input-cell" type="number" value="0" data-cell="N${newRowNumber}"></td>
+                    <td class="formula-cell" id="O${newRowNumber}">0</td>
+                    `;
+
+                // Вставляем новую строку перед последней (итоговой)
+                tableBody.insertBefore(newRow, lastRow);
+                // Обновляем расчет
+                calculateAll();
+            }
+            // Функция для удаления отмеченных рабочих строк
+            function deleteSelectedRows() {
+                const tableBody = document.getElementById("tableBody");
+                const rows = tableBody.querySelectorAll("tr");
+                const rowCount = rows.length;
+                const totalRows = rowCount - 1;
+                const rowsToDelete = [];
+                for (let i = 0; i < totalRows; i++) {
+                    const row = rows[i];
+                    const checkbox = row.querySelector(
+                        '.checkbox-cell input[type="checkbox"]'
+                    );
+                    if (checkbox && checkbox.checked) {
+                        rowsToDelete.push(row);
+                    }
+                }
+                rowsToDelete.forEach((row) => {
+                    tableBody.removeChild(row);
+                });
+                updateRowIds();
+                calculateAll();
+            }
+            // Функция для обновления ID всех рабочих строк и связанных ячеек после удаления
+            function updateRowIds() {
+                const tableBody = document.getElementById("tableBody");
+                const rows = tableBody.querySelectorAll("tr");
+                const rowCount = rows.length;
+                const totalRows = rowCount - 1;
+                for (let i = 0; i < totalRows; i++) {
+                    const currentRow = rows[i];
+                    const oldRowId = currentRow.id;
+                    const oldRowNumber = parseInt(oldRowId.substring(3));
+                    const newRowNumber = i + 2;
+                    const newRowId = "row" + newRowNumber;
+                    currentRow.id = newRowId;
+                    const inputs =
+                        currentRow.querySelectorAll("input, textarea");
+                    const formulaCells =
+                        currentRow.querySelectorAll(".formula-cell");
+                    inputs.forEach((input) => {
+                        const cellId = input.getAttribute("data-cell");
+                        if (cellId && !cellId.startsWith("CHECK")) {
+                            const letter = cellId.charAt(0);
+                            const num = parseInt(cellId.substring(1));
+                            const newNum = newRowNumber;
+                            input.setAttribute("data-cell", letter + newNum);
+                        }
+                    });
+                    const checkbox = currentRow.querySelector(
+                        '.checkbox-cell input[type="checkbox"]'
+                    );
+                    if (checkbox) {
+                        checkbox.setAttribute(
+                            "data-cell",
+                            "CHECK" + newRowNumber
+                        );
+                    }
+                    formulaCells.forEach((cell) => {
+                        const cellId = cell.id;
+                        if (
+                            cellId &&
+                            cellId.length > 1 &&
+                            !cellId.startsWith("L12")
+                        ) {
+                            const letter = cellId.charAt(0);
+                            const num = parseInt(cellId.substring(1));
+                            const newNum = newRowNumber;
+                            cell.id = letter + newNum;
+                            if (letter === "O") {
+                                const value = parseFloat(cell.textContent);
+                                cell.className =
+                                    value === 0
+                                        ? "formula-cell"
+                                        : value > 0
+                                        ? "formula-cell positive"
+                                        : "formula-cell negative";
+                            }
+                        }
+                    });
+                }
+            }
+
+            // Инициализация - сразу делаем первый расчет
+            window.onload = function () {
+                calculateAll();
+            };
+        </script>
+    </body>
+</html>
